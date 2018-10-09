@@ -1,0 +1,36 @@
+import java.io.*;
+import java.util.*;
+
+
+public class Solution {
+
+    public static void main(String[] args)throws Exception {
+        /* Enter your code here. Read input from STDIN. Print output to STDOUT. Your class should be named Solution. */
+         Scanner in = new Scanner(System.in);
+       int issueDay = in.nextInt();
+       int issueMonth = in.nextInt(); 
+     int issueYear = in.nextInt();
+        int returnDay = in.nextInt();
+        int returnMonth = in.nextInt();
+        int returnYear = in.nextInt();
+           int fine=0;
+        
+        
+         if(issueYear>returnYear){
+            fine = 10000;
+         } else if (issueMonth > returnMonth && issueYear>=returnYear){
+                 fine = 500*(issueMonth -returnMonth);
+             }else if (issueDay>returnDay && issueMonth>=returnMonth && issueYear>=returnYear){
+              fine = (issueDay-returnDay)*15;
+         }else{
+                       fine =0;
+         }
+           
+       
+        System.out.println(fine);
+       
+       
+    
+    }
+   
+}
