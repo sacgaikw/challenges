@@ -1,0 +1,262 @@
+<div class="reg-row row ">
+	<!--Checking if user has Account Identifier -->
+	<div class="reg_step1">
+		<div class="large-4 columns registration">	
+		<div class="reg-welcome">
+				<span>Register with SUEZ Water Technologies
+					&amp; Solutions.</span>
+			</div>
+			<div class="reg-purchase-acc-que">
+			
+			 <div class="checkbox">
+          <label>
+          		                         <!-- ng-model directive -->
+            <input name="terms" type="checkbox" ng-model="termsCond" required>
+             I have read the SUEZ Water Technologies & Solutions Terms and conditions and hereby agree to abide by those.
+          </label>       
+<a href="https://www.suezwatertechnologies.com/terms">(Click here to read the terms and conditions)</a>
+
+        </div>
+        </div>
+			<div class="reg-purchase-acc-que">
+				<span>Relationship with SUEZ*</span>
+			</div>
+			<div class="reg-purchase-ans">
+				<input name = "role1" class = "intro-field" ng-disabled="!termsCond" type="radio" ng-model ="role" value="Distributor" ng-click="hasAccount('Distributor')">Channel Partner/Distributor<br> 
+				</div>
+			<div class="reg-purchase-ans">	
+				<input  name = "role1"  class = "intro-field" ng-disabled="!termsCond" type="radio"  ng-model = "role" value="Customer" ng-checked ="false" ng-click="hasAccount('Customer')">Customer<br>
+			</div>
+		</div>
+
+		<div class="large-8 columns reg-right-col">
+			<div class="reg-right"></div>
+		</div>
+	</div>
+	<!--Validating Account Identifier -->
+
+
+	<div class="reg_step2 hidden">
+		<div class="large-4 columns registration">
+			<div class="top-account-que large-12">
+				<div class="reg-logo-head-back large-6">
+					<a href="#" src="/" ng-click="cancelAccount()"><img src="./assets/images/backarrow.jpg"
+						alt="Cancel">Back</a>
+				</div>
+				
+			</div>
+			<div class="reg-welcome">
+				<span>Registration is for existing SUEZ customers only.</span>
+			</div>
+			<div class="reg-purchase-acc-que">
+				<span>To validate your account enter your 10 digit Sold-To
+					Account Number. This can be found on a past order
+					acknowledgement/quote or by contacting your account rep.</span>
+			</div>
+			
+			<div class="acc-input" ng-form="frm">
+			<div id="loading" ng-cloak>
+			<img src="./assets/images/ajax-loader.gif" id="loading-image" alt="working...">
+			</div>
+			
+  <label class="has-float-label">
+    <input name ="acctNo" class="form-control" ng-model="acctNo" type="text" placeholder="Enter 10 digit account number" ng-maxlength="10" ng-minlength="10" ng-pattern="/^[0-9]*$/" ng-keyup="ClearMessage()" ng-style="bordercolor" required/>     
+     <span>Account Verification<sup><font color ="red">*</font></sup></span></label> 
+              
+  
+<input name ="verifybutton" type="button" class="verifybutton" value="Validate" ng-click ="tried =true;frm.$valid && nextClick()" />
+	<div class="field-message-acc" ng-messages="frm.acctNo.$error" ng-if='tried && frm.acctNo.$invalid || frm.acctNo.$dirty' role="alert" ng-cloak>
+          <div ng-message="required">Account number is required</div>
+           <div ng-message="minlength">Account number must have 10 digits</div>
+            <div ng-message="maxlength">Account number must have 10 digits</div>
+            <div ng-message="pattern">Can have only numbers</div>
+            <div ng-bind="validatorAccount"></div>
+        </div>
+</div>	
+<div class = "reg-modal">
+<a href="" data-toggle="modal" data-target="#statusModal" id="myModalShower">Having trouble?</a>
+</div>
+ 
+	</div>
+ 
+
+		<div class="large-8 columns reg-right-col">
+			<div class="reg-right-verify"></div>
+		</div>
+	</div>
+
+<div id="statusModal" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color:#9BCD41">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Help Window</h4>
+      </div>
+      <div class="modal-body">
+        <p>Can't find your account number? Please call our Customer Care team using a number from the drop down below.</p>
+      <label>Call Customer Care in:
+    <select ng-model="selectedContact" ng-options="x.country for x in contacts" >
+</select><span>{{selectedContact.phone}}</span>
+
+  </label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" style="background-color:#9BCD41">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="termsModal" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Terms & Conditions</h4>
+      </div>
+      <div class="modal-body">
+       <a href = "https://www.suezwatertechnologies.com/terms"> </a></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+	<!--User Credential input-->
+
+	<div class="reg_step3 hidden">
+		<div class="large-4 columns registration">
+			<div class="top-account-que large-12">
+				<div class="reg-logo-head-back large-6">
+					<a href="#" src="/" ng-click="cancelClick()"><img src="./assets/images/backarrow.jpg"
+						alt="Back">Back</a>
+				</div>
+			
+			</div>
+			<div class="reg-welcome large-12">
+				<span>Great! Your account exits with us.</span>
+			</div>
+			
+		
+			<div class="reg-user-det-top" >
+				<span>Create your User Name and Password</span>
+			</div>
+			
+			<div class="user-details-creds" ng-form="userForm">
+			<div id="loadingcreate">
+			<img src="./assets/images/ajax-loader.gif" id="loading-image-create" alt="working...">
+			</div>	
+ <label class="form-group has-float-label">
+  <input name="username" class="form-control" ng-model="username" type="text"  placeholder="Create User Name" ng-pattern="/^([A-Za-z]|[0-9]|_)+$/" ng-blur="checkIfUserExists(username)" ng-keyup="ClearMessage()" ng-style="bordercolor" required/>
+  <span>Create User Name<sup><font color ="red">*</font></sup></span>
+    <div class="form-group field-message" ng-messages="userForm.username.$error" role="alert" ng-if='triedUserForm && userForm.username.$invalid || userForm.username.$dirty' ng-cloak>
+   <div ng-message="required">Username is required</div>
+   <div ng-message="pattern">Username should have alphanumeric characters and underscore only</div>
+   <div ng-bind="validator"></div>
+  </div></label>
+   
+   <label class="form-group has-float-label">
+  <input name ="password" class="form-control" ng-model="password" type="password" placeholder="Enter Password" ng-pattern="/^(?=.*[a-z])(?=.*[A-Z])(?=(.*\d){2})(?=.*[.@-_])[a-zA-Z][a-zA-Z\d\d.@-_]{6,14}[a-zA-Z]$/" required/>
+      <span>Password<sup><font color ="red">*</font></sup></span>     
+      <div class="form-group field-message" ng-messages="userForm.password.$error" role="alert" ng-if='triedUserForm && userForm.password.$invalid || userForm.password.$dirty' ng-cloak>
+          <div ng-message="required">Password is required</div>         
+            <div ng-message="pattern">Your password is case sensitive, must be at least 8 characters long,
+must have one upper-case letter, must start and end with a letter, 
+and must contain at least two numbers. No special characters except ., @, -, _.</div>
+        </div></label>
+     
+   
+    <label class="form-group has-float-label">
+  <input name ="confpassword" class="form-control" ng-model="confpassword" type="password" placeholder="Enter Confirm Password" required/>
+  <span>Confirm Password<sup><font color ="red">*</font></sup></span>
+  <div class="form-group field-message" ng-messages="userForm.confpassword.$error" role="alert" ng-if='triedUserForm && userForm.confpassword.$invalid || userForm.confpassword.$dirty' ng-cloak>
+        
+          <div ng-message="required">Password confirmation required.</div>
+          <div  ng-show="confpassword != password">Password and Confirm Password do not match</div>
+        </div></label>
+        
+ <label class="form-group has-float-label">
+  <input name="firstname" class="form-control" ng-model="firstname" type="text"  placeholder="Enter First Name" required/>
+  <span>First Name<sup><font color ="red">*</font></sup></span>
+    <div class="form-group field-message" ng-messages="userForm.firstname.$error" role="alert" ng-if='triedUserForm && userForm.firstname.$invalid || userForm.firstname.$dirty' ng-cloak>
+   <div ng-message="required">First Name is required</div>   
+  </div></label> 
+  
+  <label class="form-group has-float-label">
+  <input name="lastname" class="form-control" ng-model="lastname" type="text"  placeholder="Enter Last Name" required/>
+  <span>Last Name<sup><font color ="red">*</font></sup></span>
+    <div class="form-group field-message" ng-messages="userForm.lastname.$error" role="alert" ng-if='triedUserForm && userForm.lastname.$invalid || userForm.lastname.$dirty' ng-cloak>
+   <div ng-message="required">Last Name is required</div>   
+  </div></label>  
+  
+   <label class="form-group has-float-label">
+  <input name="email" class="form-control" ng-model="email" type="email"  placeholder="Enter Email Address" ng-model="email" required/>
+  <span>Email<sup><font color ="red">*</font></sup></span>
+    <div class="form-group field-message" ng-messages="userForm.email.$error" role="alert" ng-if='triedUserForm && userForm.email.$invalid || userForm.email.$dirty' ng-cloak>
+   <div ng-message="required">Email is required</div>
+   <div ng-message="email">Not a valid email address</div>
+  </div></label>      
+    
+  
+<input name ="nextform" type="button" class="next2" value="Complete Registration" ng-click="triedUserForm =true;userForm.email.$valid && next2Click()" />
+</div> 
+	</div>
+	<div class="acc-input large-12" ng-form ="confrm">
+			<div id="loadingcreate">
+			<img src="./assets/images/ajax-loader.gif" id="loading-image-create" alt="working...">
+			</div>			
+		</div>
+
+		<div class="large-8 columns reg-right-col">
+			<div class="reg-right-user-details-creds"></div>
+		</div>
+	</div>
+
+	<!--success/failure message -->
+
+	<div class="reg_step4 hidden">
+		<div class="large-4 columns registration">
+			<div class="top-account-que large-12">
+				<div class="reg-logo-head-back large-6">
+					<a href="#" src="/" ng-click="cancel2Click()"><img src="./assets/images/backarrow.jpg"
+						alt="Back">Back</a>
+				</div>
+				
+			</div>
+						
+			
+		<div class="reg-purchase-acc-que">
+			<div class="reg-success">			
+			</div>
+			
+			</div>
+			
+			<div class="reg-purchase-acc-que large-12 ">
+				
+					<span>Additional Security Information</span>
+				
+			</div>
+			<div class="user-details-info">
+				Important: You will receive an email shortly including a link to
+				validate your email address. Email validation is required to
+				complete your registration. Once your email is successfully
+				validated, you will have immediate access to our EStore(in selected
+				locations). </br>
+				</br> In addition, our registration admin will review your account within
+				2 business days and provide you access to secured parts of Document
+				Library. </br>
+				</br> For assistance, please contact SWTS.administrator.com
+			</div>
+			
+			
+			
+			
+</div>
+		<div class="large-8 columns reg-right-col">
+			<div class="reg-right-complete-registration"></div>
+		</div>
+	</div>
+</div>
+
+
