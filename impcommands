@@ -1,0 +1,6 @@
+nohup java -Deserver.port=7001 -Dspring.profiles.active=development -jar gew-registration-service-0.0.1-SNAPSHOT.jar &
+nohup java -Dserver.port=8088 -Dspring.profiles.active=development -jar gew-bulk-registration-ui-0.0.1-SNAPSHOT.jar &
+
+ps -ef | grep java
+
+mvn install -DskipTests
