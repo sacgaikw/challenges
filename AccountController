@@ -1,0 +1,194 @@
+package com.ge.power.controllers;
+
+import com.ge.power.entities.AccountModel;
+import com.ge.power.entities.Application;
+import com.ge.power.entities.Company;
+import com.ge.power.models.AccountStatus;
+import com.ge.power.models.BulkUserModel;
+import com.ge.power.models.CreateUserModel;
+import com.ge.power.models.UpdateUserModel;
+import com.ge.power.models.ConsolidatedUserModel;
+import com.ge.power.repositories.IAccountModelRepository;
+import com.ge.power.services.MailService;
+import com.ge.power.services.SfdcService;
+import com.ge.power.services.SsoService;
+import com.ge.power.services.UserService;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.apache.velocity.app.VelocityEngine;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.ui.velocity.VelocityEngineUtils;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ * Created by Steve Mason (212546365) on 12/2/16. Modified by Antara (503071097)
+ * on 8/1/2018
+ */
+
+@Slf4j
+@RestController
+@CrossOrigin
+@RequestMapping("/account")
+public class AccountController {
+
+	@Value("${communities.redirectUrl}")
+	private String redirectUrl;
+	@Value("${mail.sender}")
+	private String fromEmail;
+	private final SsoService ssoService;
+	private final UserService userService;
+	private final MailService mailService;
+	private final SfdcService sfdcService;
+	private IAccountModelRepository accountModelRepository;
+	private VelocityEngine velocityEngine;
+
+	@Autowired
+	public AccountController(UserService userService, SsoService ssoService, MailService mailService,
+			IAccountModelRepository accountModelRepository, VelocityEngine velocityEngine, SfdcService sfdcService) {
+		this.ssoService = ssoService;
+		this.userService = userService;
+		this.mailService = mailService;
+		this.accountModelRepository = accountModelRepository;
+		this.velocityEngine = velocityEngine;
+		this.sfdcService = sfdcService;
+	}
+
+	@RequestMapping(value = "/", method = RequestMethod.POST)
+	public String addAccount(@RequestBody CreateUserModel user) {
+
+		// create the Azure AD account via snaplogic
+		String userResponse = userService.addUser(user);
+
+		// Consolidate registration data to save in snaplogic
+		ConsolidatedUserModel consModel = ConsolidatedUserModel.builder().accountId(user.getAccountId())
+				.email(user.getEmail()).firstName(user.getGivenName()).lastName(user.getSurName())
+				.objectId(userResponse.toString()).userId(user.getUserName()).userUUID(UUID.randomUUID().toString())
+				.build();
+		log.info(consModel.toString());
+		
+		/// send data to snaplogic
+		String resp = userService.sendDataSnaplogic(consModel);
+		
+		//encoding data
+		String encodedUsername = Base64.getEncoder().encodeToString(user.getUserName().getBytes());
+		String encodedUUID = Base64.getEncoder().encodeToString(UUID.randomUUID().toString().getBytes());
+		
+		//prepare encoded data for email
+		ConsolidatedUserModel consModel1 = ConsolidatedUserModel.builder().accountId(user.getAccountId())
+				.email(user.getEmail()).firstName(user.getGivenName()).lastName(user.getSurName())
+				.objectId(userResponse.toString()).userId(encodedUsername).userUUID(encodedUUID)
+				.build();
+		// send email for verification
+		if (!userResponse.toString().equalsIgnoreCase("Error in user creation")) {
+			try {
+				Map templateModel = new HashMap();
+				templateModel.put("account", consModel1);
+				String messageText = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
+						"templates/registration-verify.vm", templateModel);
+				mailService.sendMail(user.getEmail(), "Your Account...", messageText, fromEmail);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return userResponse.toString();
+	}
+
+	@RequestMapping(value = "/bulk", method = RequestMethod.POST)
+	public String addBulkAccount(@RequestBody BulkUserModel user) {
+		// create account with inserted status
+		AccountModel model = AccountModel.builder().accountStatus(AccountStatus.INSERTED).userName(user.getUserName())
+				.firstName(user.getFirstName()).lastName(user.getLastName()).email(user.getEmailAddress())
+				.userUuid(UUID.randomUUID().toString()).accountId(user.getShipToNumber())
+
+				.build();
+		accountModelRepository.save(model);
+
+		// create the Bulk account on Azure AD
+		String userResponse = userService.addBulkUser(user);
+		// update account with pending status
+		model.setAccountStatus(AccountStatus.PENDING);
+		accountModelRepository.save(model);
+		
+		ConsolidatedUserModel consModel = ConsolidatedUserModel.builder().accountId(user.getShipToNumber())
+				.email(user.getEmailAddress()).firstName(user.getFirstName()).lastName(user.getLastName())
+				.objectId(userResponse.toString()).userId(user.getUserName()).userUUID(UUID.randomUUID().toString())
+				.build();
+		log.info(consModel.toString());
+		/// send data to snaplogic
+				String resp = userService.sendDataSnaplogic(consModel);
+				// encoding data
+				String encodedUsername = Base64.getEncoder().encodeToString(user.getUserName().getBytes());
+				String encodedUUID = Base64.getEncoder().encodeToString(UUID.randomUUID().toString().getBytes());
+				
+				//prepare encoded data
+				ConsolidatedUserModel consModel1 = ConsolidatedUserModel.builder().accountId(user.getShipToNumber())
+						.email(user.getEmailAddress()).firstName(user.getFirstName()).lastName(user.getLastName())
+						.objectId(userResponse.toString()).userId(encodedUsername).userUUID(encodedUUID)
+						.build();
+		// send email for verification
+				if (!userResponse.toString().equalsIgnoreCase("Error in user creation")) {
+		try {
+			Map templateModel = new HashMap();
+			templateModel.put("account", consModel1);
+			String messageText = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
+					"templates/bulk-registration-verify.vm", templateModel);
+			mailService.sendMail(user.getEmailAddress(), "Your Account...", messageText, fromEmail);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+				}
+		return userResponse;
+	}
+
+	@RequestMapping(value = "/verify/{userName},{userUuid}", method = RequestMethod.GET)
+	public String verifyAccount(@PathVariable String userName, @PathVariable String userUuid,
+			HttpServletResponse response) {
+		// send verify email data to snaplogic
+		String userResponse = userService.verifyAccount(userName, userUuid);
+		// response after verify email
+		response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+		response.setHeader("Location", this.redirectUrl);
+		response.setHeader("Connection", "close");
+		return "Account Verified";
+	}
+
+	@RequestMapping(value = "/registrationData", method = RequestMethod.POST)
+	public String sendDataSnaplogic(@RequestBody ConsolidatedUserModel model) {
+		String result = userService.sendDataSnaplogic(model);
+		return result;
+	}
+	
+	
+
+	/*
+	 * @RequestMapping(value = "/resetpassword/{userUuid}", method =
+	 * RequestMethod.POST) public String resetPassword(@PathVariable String
+	 * userUuid, @RequestBody AccountModel user, HttpServletResponse response) {
+	 * try{ List<AccountModel> models =
+	 * accountModelRepository.findByUserUuid(userUuid); if (models.size() > 0){
+	 * AccountModel acct = models.get(0); acct.setPassword(user.getPassword());
+	 * acct.setLastModifiedDate(new Date()); accountModelRepository.save(acct);
+	 * } userService.resetPassword(user); return "Password updated"; }
+	 * catch(Exception ex) { return ex.getMessage(); } }
+	 */
+
+}
