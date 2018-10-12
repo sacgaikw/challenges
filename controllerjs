@@ -1,0 +1,334 @@
+bulkRegisterApp
+		.controller(
+				'registerController',
+				function($scope, $rootScope, $http, $state, $timeout,$window) {
+					$scope.registerVar = "register";		
+
+					$(document)
+							.ready(
+									function() {
+
+										$scope.contacts = [
+										    {country : "US/Canada", phone : "1-866-439-2837"},
+										    {country : "Australia/New Zealand", phone : "1-800-064-140"},
+										    {country : "Argentina", phone : "54 11 5556 2198"},
+										    {country : "Brazil", phone : "55 11 2139 1111"},
+										    {country : "Chile", phone : "56 2 3966017 0800396601"},
+										    {country : "China", phone : "86 40 0884 8270"},
+										    {country : "EU, Middle East, Africa", phone : "+32 14 256 970"},
+										    {country : "India", phone : "91 80 6702 1228 or 91 80 4266 5835"},
+										    {country : "Mexico", phone : "52 81 8152 7227"},
+										    {country : "Peru", phone : "080053455"},
+										    {country : "Indonesia", phone : "001 803 440 871"},
+										    {country : "Japan", phone : "81 3 5544 3789"},
+										    {country : "Korea", phone : "82 5 223 5300"},
+										    {country : "Malaysia", phone : "1800 813 798"},
+										    {country : "New Zealand", phone : "0800 945 634"},
+										    {country : "Philippines", phone : "1800 1441 0307"},
+										    {country : "Singapore", phone : "65 6268 4366"},
+										    {country : "Taiwan", phone : "88 62 2504 2101"},
+										    {country : "Thailand - Rayong", phone : "66 3860 7456 (ext124)"},
+										    {country : "Thailand - Bangkok", phone : "66 2751 3344 (ext143)"},
+										    {country : "Venezuela", phone : "58 241 8385808 Ext. 136"}
+										];
+										
+										$scope.selectedContact = $scope.contacts[0];
+										
+										// User having Account Identifier
+										$scope.hasAccount = function(value) {
+										alert(value);
+											$('.reg_step1').slideUp(500);
+											$('.reg_step2').removeClass(
+													'hidden');
+										}
+
+										$scope.noClick = function() {
+											$('.reg_step1').slideUp(500);
+											$('.reg_step2').removeClass(
+													'hidden');
+											$('.reg_step2').slideUp(500);
+											$('.reg_step3').removeClass(
+													'hidden');
+											$('.reg-acc-det').empty();
+											$('.reg-welcome').empty();
+
+										}
+
+										// /added by Antara for cancel click
+										$scope.cancelAccount = function() {											
+											$('.reg_step1').slideDown(500);
+											$('.reg_step2').addClass('hidden');	
+											//delete $scope.acctNo.value;
+										}
+										
+										
+
+										// User validating Account Identifier
+										$scope.nextClick = function() {												
+											$scope.showAccountInfo();										
+
+										}
+										//function to load account information	
+										$scope.showAccountInfo = function() {											
+											var acctNo = $scope.acctNo;
+										
+											console.log("pulling records..."
+													+ acctNo);
+
+											$('#loading').show();
+											$
+													.ajax({
+														url : 'user/accountAvailable',
+														type : 'GET',
+														dataType : 'json',
+														responseType : 'JSON',
+														contentType : "application/json; charset=utf-8",
+														async : true,
+														data : {
+															accountId : acctNo
+
+														},
+
+														success : function(data) {															
+															console.log(data);
+															var errorMessage = data[0]['Response']['Error'];
+															console
+																	.log(data[0]['Response']['Error']);
+															if (errorMessage == "") {
+																
+																//var accountName = data[0]['Response']['Data']['AccountName'];
+																//var street = data[0]['Response']['Data']['Street'];
+																//var city = data[0]['Response']['Data']['City'];
+																//var state = data[0]['Response']['Data']['State'];
+																//var country = data[0]['Response']['Data']['Country'];
+																//var postalcode = data[0]['Response']['Data']['PostalCode'];
+
+																$('#loading')
+																		.hide();
+																$('.reg_step2')
+																		.slideUp(
+																				500
+																				/*function() {
+																					$(
+																							'.reg-acc-det')
+																							.append(
+																									"<span>"
+																											+ accountName
+																											+ "<span><br/>");
+																					$(
+																							'.reg-acc-det')
+																							.append(
+																									"<span>"
+																											+ street
+																											+ "<span><br/>");
+																					$(
+																							'.reg-acc-det')
+																							.append(
+																									"<span>"
+																											+ city
+																											+ "<span><br/>");
+																					$(
+																							'.reg-acc-det')
+																							.append(
+																									"<span>"
+																											+ state
+																											+ "<span>,");
+																					$(
+																							'.reg-acc-det')
+																							.append(
+																									"<span>"
+																											+ country
+																											+ "<span>,");
+																					$(
+																							'.reg-acc-det')
+																							.append(
+																									"<span>"
+																											+ postalcode																									
+																											+ "<span>");																					
+																					$scope.$apply();
+																					
+																				}*/);
+																				$('.reg-acc-det').empty();
+																$('.reg_step3')
+																		.removeClass(
+																				'hidden');
+															} else {
+																$scope.validatorAccount = "Account does not exist";
+																$scope.bordercolor ={
+																		"border":"0.5px solid red"
+																}
+																$scope.$apply();														
+																$('#loading').hide();
+
+															}
+															
+														},
+														error : function(data) {
+															$scope.validatorAccount = "Error in fetching data.Try Later";
+															$scope.bordercolor ={
+																	"border":"0.5px solid red"
+															}
+															$scope.$apply();														
+															$('#loading')
+																	.hide();
+
+														}
+
+													});
+
+										}
+
+										$scope.cancelClick = function() {
+											$('.reg_step2').slideDown(500);
+											$('.reg_step3').addClass('hidden');
+										}
+
+										// User Credentials completed
+									//	$scope.next2Click = function() {
+										//	$('.reg_step3').slideUp(500);
+									//		$('.reg_step4').removeClass(
+										//			'hidden');
+
+									//	}
+
+										$scope.cancel2Click = function() {
+											$('.reg_step3').slideDown(500);
+											$('.reg_step4').addClass('hidden');
+										}
+
+										//function to check user availability
+										$scope.checkIfUserExists = function(username) {
+											if(username!=null){
+																						
+											console.log("pulling records..."
+													+ username);
+											$('#loadingcreate').show();
+											$
+													.ajax({
+														url : 'user/userAvailable',
+														type : 'GET',
+														dataType : 'json',
+														responseType : 'JSON',
+														contentType : "application/json; charset=utf-8",
+														async : true,
+														data : {
+															userId : username
+														},
+
+														success : function(data) {
+															console.log(data);
+															var errorMessage = data[0]['Response']['isUserNameAvailable'];
+															console.log(data[0]['Response']);
+															var message = JSON.stringify(errorMessage);		
+															if (message == "false") {
+															$scope.validator = "Username already exists. Please try again";															
+															$scope.bordercolor ={
+																	"border":"0.5px solid red"
+															}
+															$scope.$apply();	
+																
+															}
+															$('#loadingcreate').hide();
+														},
+														error:function(data) {	
+															console.log(data);
+															$scope.validator ="Error getting Username!! Try later";
+															$scope.bordercolor ={
+																	"border":"0.5px solid red"
+															}
+															$('#loadingcreate').hide();
+
+														}
+													
+														
+													});
+											}
+										}
+										 $scope.ClearMessage = function () {
+								                $scope.validator = "";
+								                $scope.validatorAccount ="";
+								                $scope.bordercolor="";
+								            };
+
+										
+										
+										
+										$scope.next2Click = function() {									
+									
+											var postData = {
+													  "confirmPassword": "string",
+													  "email": "string",
+													  "givenName": "string",
+													  "password": "string",
+													  "surName": "string",
+													  "userName": "string",
+													 "accountId":"string"
+													}
+											postData.confirmPassword = $scope.confpassword;
+											postData.password = $scope.password;
+											postData.userName = $scope.username;
+											postData.givenName = $scope.firstname;
+											postData.surName = $scope.lastname;
+											postData.email = $scope.email;
+											postData.accountId = $scope.acctNo;
+											$('#loadingcreate').show();
+											//alert($('#loading').show());
+											$
+													.ajax({
+
+														url : 'account/',
+														type : 'post',
+														CORS : true,
+														dataType : "text",
+														contentType : "application/json; charset=utf-8",
+														data : JSON
+																.stringify(postData),
+														async : true,
+														success : function(data) {
+															if (data != "Error in user creation") {
+																var registrationStatus = "Thank you for setting up your username and password!";
+																$('#loadingcreate').hide();																
+																$('.reg_step3')
+																		.slideUp(
+																				500,function() {
+																					$(
+																					'.reg-success')
+																					.append(
+																							"<span>"
+																									+ registrationStatus
+																									+ "<span>")});
+																$('.reg-success').empty();
+																$('.reg_step4')
+																		.removeClass(
+																				'hidden');
+															}
+														},
+														error : function(data) {														
+																var registrationStatus = "Registration failed!! Try Later";
+																$('#loadingcreate').hide();
+
+																$('.reg_step3')
+																		.slideUp(
+																				500,function() {
+																					$(
+																					'.reg-success')
+																					.append(
+																							"<span>"
+																									+ registrationStatus
+																									+ "<span>")});
+																$('.reg-success').empty();																
+																$('.reg_step4')
+																		.removeClass(
+																				'hidden');
+														}
+													});
+
+										}
+									});
+					function showLoader() {
+						$('.loader').removeClass("hidden")
+					}
+					function hideLoader() {
+						$('.loader').addClass("hidden")
+					}
+				});
