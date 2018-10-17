@@ -1,0 +1,64 @@
+package com.ge.power.configs;
+
+import com.google.common.base.Predicate;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import springfox.documentation.builders.ApiInfoBuilder;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.service.ApiInfo;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger.web.UiConfiguration;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+
+import static springfox.documentation.builders.PathSelectors.regex;
+import static com.google.common.base.Predicates.or;
+
+/**
+ * Created by Randy Damron (212410481) on 7/13/16.
+ */
+
+@Profile("!production")
+@EnableSwagger2
+@Configuration
+public class ApiDocumentationConfig {
+    @Bean
+    public Docket documentation() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                //.ignoredParameterTypes()
+                .select()
+                .apis(RequestHandlerSelectors.any())
+                .paths(apiPaths())
+                .build()
+                .pathMapping("/")
+                .apiInfo(apiInfo());
+    }
+
+    @Bean
+    public UiConfiguration uiConfig() {
+        return UiConfiguration.DEFAULT;
+    }
+
+    private Predicate<String> apiPaths() {
+        return or(
+                regex("/sso.*"),
+                regex("/user.*"),
+                regex("/test.*"),
+                regex("/account.*")
+        );
+    }
+
+    private ApiInfo apiInfo() {
+        return new ApiInfoBuilder()
+                .title("Water Registration API")
+                .description("This is the API documentation for the GE Water Registration Service")
+                .termsOfServiceUrl("http://springfox.io")
+                .contact("Antara Ganguly <antara.ganguly@ge.com>")
+                .license("GE Internal License")
+                .licenseUrl("https://ge.com")
+                .version("2.0")
+                .build();
+    }
+}
