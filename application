@@ -1,0 +1,47 @@
+server:
+  use-forward-headers: true
+  context-path: /bulk-registration
+  tomcat:
+    remote-ip-header: x-forwarded-for
+    protocol-header: x-forwarded-proto
+    protocol-header-https-value: http
+
+registration:
+  endpoint: http://localhost:8088/registration/
+  apiPath: account/bulk
+
+adminUser:
+  endpoint: http://localhost:8088/registration/
+  apiPath: /user/searchUser?userId={0}
+  apiUpdatePath: user/updateUser
+
+approval:
+  endpoint: http://localhost:8088/registration/
+  apiPath: user/approval
+
+spring:
+  resources:
+    chain:
+      enabled: true
+
+security:
+  ignored: /favicon.ico
+  basic:
+    enabled: false
+
+logging:
+  level.: info
+
+---
+spring:
+  profiles: development
+registration:
+  endpoint: http://internal-registration-qa-alb-609100274.us-east-1.elb.amazonaws.com/registration/
+  apiPath: account/bulk
+approval:
+  endpoint: http://dev-water-communities-2.power.ge.com/registration/
+  apiPath: user/approval
+logging:
+  level.: info
+server:
+  port: 8088
