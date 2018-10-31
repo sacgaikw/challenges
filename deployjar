@@ -1,0 +1,70 @@
+Deploying a Spring Boot Application on AWS instance (Centos box).
+Step 1 : Create Maven Jar in local .
+1.	Download maven
+2.	Set up the environment variable
+3.	JAVA_HOME - C:\Program Files\Java\jdk1.8.0_172
+4.	JDK path to - C:\Program Files\Java\jdk1.8.0_172\bin
+5.	Maven path to - C:\Users\angangul\apache-maven-3.5.4\bin
+6.	Move to the project folder in command line and issue the command : mvn package
+Step 2 : Install JDK into Centos@10.173.153.76.
+1.	Download jdk-8u102-linux-x64.rpm from Oracle
+2.	Copy the rmp file using winscp to /home/ubuntu
+3.	Copy to centos command: $scp /home/ubuntu/filename centos@10.173.153.76:/home/centos
+4.	Move to centos command:  $cd /home/centos
+5.	Install java command: $sudo yum localinstall jdk-8u102-linux-x64.rpm
+6.	$ sudo yum localinstall jdk-8u102-linux-x64.rpm
+7.	
+8.	//...
+9.	//...
+10.	//...
+11.	Installed:
+12.	  jdk1.8.0_102.x86_64 2000:1.8.0_102-fcs                                                                                                                                          
+13.	
+14.	Complete!
+
+Step 3: Install Apache httpd webserver on centos@10.173.153.76.
+1.	Change to root : sudo su
+2.	Command : $ yum install httpd
+3.	Start the httpd service : $ systemctl start httpd
+4.	To check the configuration syntax of httpd.conf file :sudo apache2ctl configtest
+5.	Update the httpd.conf file to integrate port 80(webserver) to redirect to 8080(tomcat).
+6.	Open httpd.conf: sudo nano /etc/httpd/conf/httpd.conf
+7.	Add the following lines of code:
+
+ 
+LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_http_module modules/mod_proxy_http.so
+ProxyRequests Off
+ProxyPreserveHost On
+RewriteEngine On
+<Proxy http://localhost:8080>
+Order deny,allow
+Allow from all
+</Proxy>
+ProxyPass /registration http://localhost:8080/registration
+ProxyPassReverse /registration http://localhost:8080/registration
+8.	Restart httpd command: systemctl restart httpd
+9.	To check logs command: sudo nano  /var/log/httpd/error_log.
+10.	Centos by default ships do that httpd processes cannot initiate outbound connections, which is just what mod_proxy attempts to do. To fix this first test by setting the boolean dynamically (not permanent):  /usr/sbin/setsebool httpd_can_network_connect 1
+11.	Permanent : /usr/sbin/setsebool -P httpd_can_network_connect 1
+12.	Run the jar file command: $ java -jar <filename.jar>
+13.	Test the service on port 80 : curl -L http://localhost:80/registration.
+
+*To check the httpd service is running or not
+*systemctl status httpd 
+*To configtest
+*Apachectl configtest
+
+To run with different port 
+Java -Dserver.port=7001 -jar filename
+To skip test to create a maven project: mvn install -DskipTests
+
+
+	
+
+
+
+
+
+
+
